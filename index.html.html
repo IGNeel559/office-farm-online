@@ -1,0 +1,393 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+#app{font-family:var(--font-sans);padding:1rem;max-width:680px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.screen{display:none}.screen.active{display:block}
+
+.login-wrap{display:flex;flex-direction:column;gap:12px;max-width:320px;margin:2rem auto}
+.login-title{font-size:22px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.login-sub{font-size:14px;color:var(--color-text-secondary);margin-bottom:8px}
+.avatar-row{display:flex;gap:8px;flex-wrap:wrap}
+.av-btn{width:40px;height:40px;border-radius:50%;border:2px solid var(--color-border-tertiary);background:var(--color-background-secondary);font-size:20px;cursor:pointer;transition:border-color .15s,transform .1s;display:flex;align-items:center;justify-content:center}
+.av-btn:hover{transform:scale(1.1)}
+.av-btn.sel{border-color:#3a6b1e;border-width:2.5px}
+.name-input{padding:9px 13px;border:1px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:14px;font-family:var(--font-sans);background:var(--color-background-primary);color:var(--color-text-primary);width:100%}
+.name-input:focus{outline:none;border-color:#3a6b1e}
+.btn-primary{padding:10px 20px;background:#3a6b1e;color:#fff;border:none;border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font-sans);transition:background .15s}
+.btn-primary:hover{background:#2d5518}
+.btn-sm{padding:6px 12px;border:1px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:12px;cursor:pointer;font-family:var(--font-sans);background:var(--color-background-primary);color:var(--color-text-primary)}
+.btn-sm:hover{background:var(--color-background-secondary)}
+
+.hud{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.hud-avatar{font-size:18px}
+.hud-name{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.coins-badge{font-size:13px;padding:4px 10px;background:#eaf3de;color:#27500a;border-radius:99px;font-weight:500}
+.online-pill{font-size:11px;padding:3px 9px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:99px;color:var(--color-text-secondary);margin-left:auto}
+
+.tabs{display:flex;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1rem}
+.tab{padding:8px 16px;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;color:var(--color-text-secondary);background:none;border-top:none;border-left:none;border-right:none;font-family:var(--font-sans)}
+.tab.active{color:#3a6b1e;border-bottom-color:#3a6b1e}
+
+.farm-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:1rem}
+.plot{aspect-ratio:1;border-radius:10px;border:1.5px solid #c8a97a;background:#c8a97a;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:20px;transition:transform .12s;position:relative;user-select:none}
+.plot:hover{transform:scale(1.07)}
+.plot.tilled{background:#8B5E3C;border-color:#5a3a1a}
+.plot.seeded,.plot.growing{background:#5a7a2a;border-color:#3a5a10}
+.plot.ready{background:#3d6b18;border-color:#7ed64e;box-shadow:0 0 0 2px #7ed64e44}
+.plot.mine{border-color:#3a6b1e;border-width:2px}
+.plot.others{opacity:.85}
+.owner-tag{position:absolute;top:2px;left:3px;font-size:8px;color:#fff;background:rgba(0,0,0,.4);border-radius:3px;padding:1px 3px;line-height:1.3;max-width:90%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.progress-pip{position:absolute;bottom:0;left:0;right:0;height:3px;background:#7ed64e;border-radius:0 0 8px 8px}
+.water-dot{position:absolute;top:2px;right:3px;font-size:8px}
+
+.tools-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+.tool{padding:7px 12px;border-radius:var(--border-radius-md);border:1px solid var(--color-border-secondary);background:var(--color-background-primary);font-size:13px;cursor:pointer;font-family:var(--font-sans);color:var(--color-text-primary);transition:background .12s,border-color .12s}
+.tool:hover{background:var(--color-background-secondary)}
+.tool.active{background:#eaf3de;border-color:#3a6b1e;color:#27500a}
+
+.seed-shop{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
+.seed-card{border:1.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:10px 8px;text-align:center;cursor:pointer;transition:border-color .12s,transform .1s;background:var(--color-background-primary)}
+.seed-card:hover{transform:translateY(-1px);border-color:var(--color-border-primary)}
+.seed-card.sel{border-color:#3a6b1e;border-width:2px}
+.seed-em{font-size:22px;display:block;margin-bottom:3px}
+.seed-nm{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.seed-pr{font-size:11px;color:#27500a;margin-top:3px;font-weight:500}
+.seed-info{font-size:10px;color:var(--color-text-secondary)}
+
+.leaderboard{display:flex;flex-direction:column;gap:8px}
+.lb-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);background:var(--color-background-primary)}
+.lb-rank{font-size:14px;font-weight:500;width:24px;color:var(--color-text-secondary)}
+.lb-av{font-size:20px}
+.lb-name{font-size:13px;font-weight:500;flex:1;color:var(--color-text-primary)}
+.lb-coins{font-size:13px;color:#27500a;font-weight:500}
+.lb-me{border-color:#3a6b1e;background:#f6fbf0}
+
+.log-box{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px 12px;font-size:12px;color:var(--color-text-secondary);min-height:32px;margin-top:8px}
+.log-box b{color:var(--color-text-primary)}
+
+.notify{position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:#3a6b1e;color:#fff;font-size:10px;padding:2px 6px;border-radius:99px;white-space:nowrap;pointer-events:none;animation:popUp .4s ease;z-index:10}
+@keyframes popUp{from{opacity:0;transform:translateX(-50%) translateY(4px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+.section-label{font-size:11px;font-weight:500;color:var(--color-text-secondary);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.divider{height:0.5px;background:var(--color-border-tertiary);margin:12px 0}
+</style>
+
+<div id="app">
+<h2 class="sr-only">Office Farm — เกมปลูกผักออนไลน์สำหรับทีม</h2>
+
+<div id="screen-login" class="screen active">
+  <div class="login-wrap">
+    <div>
+      <div class="login-title">🌱 Office Farm</div>
+      <div class="login-sub">เลือก avatar และชื่อของคุณเพื่อเข้าร่วม</div>
+    </div>
+    <div>
+      <div class="section-label">Avatar</div>
+      <div class="avatar-row" id="avatar-row"></div>
+    </div>
+    <div>
+      <div class="section-label">ชื่อ</div>
+      <input class="name-input" id="name-input" placeholder="ชื่อเล่นในออฟฟิศ" maxlength="12" />
+    </div>
+    <button class="btn-primary" onclick="doLogin()">เข้าร่วมฟาร์ม →</button>
+    <div id="login-err" style="font-size:12px;color:var(--color-text-danger);display:none"></div>
+  </div>
+</div>
+
+<div id="screen-game" class="screen">
+  <div class="hud">
+    <span class="hud-avatar" id="hud-av"></span>
+    <span class="hud-name" id="hud-name"></span>
+    <span class="coins-badge" id="hud-coins">🪙 120</span>
+    <span class="online-pill" id="online-pill">● 1 คนออนไลน์</span>
+    <button class="btn-sm" onclick="logout()">ออก</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('farm',this)">🌿 ฟาร์ม</button>
+    <button class="tab" onclick="switchTab('shop',this)">🛒 ร้านค้า</button>
+    <button class="tab" onclick="switchTab('board',this)">🏆 อันดับ</button>
+  </div>
+
+  <div id="tab-farm">
+    <div class="section-label">เครื่องมือ</div>
+    <div class="tools-row">
+      <button class="tool active" id="t-till" onclick="useTool('till',this)">⛏ ไถดิน</button>
+      <button class="tool" id="t-seed" onclick="useTool('seed',this)">🌱 หว่าน</button>
+      <button class="tool" id="t-water" onclick="useTool('water',this)">💧 รดน้ำ</button>
+      <button class="tool" id="t-harvest" onclick="useTool('harvest',this)">🧺 เก็บ</button>
+      <button class="tool" id="t-sell" onclick="sellAll()" style="border-color:#c0392b;color:#c0392b">💵 ขายหมด</button>
+    </div>
+    <div class="section-label" style="margin-top:8px">แปลงปลูกรวม (5×5)</div>
+    <div class="farm-grid" id="farm-grid"></div>
+    <div class="log-box" id="log-box">เลือกเครื่องมือแล้วคลิกแปลง</div>
+  </div>
+
+  <div id="tab-shop" style="display:none">
+    <div class="section-label">เลือกเมล็ดพันธุ์ที่จะหว่าน</div>
+    <div class="seed-shop" id="seed-shop"></div>
+    <div class="divider"></div>
+    <div class="section-label">คลังของคุณ</div>
+    <div id="inventory-view" style="font-size:13px;color:var(--color-text-secondary)">ยังไม่มีผัก</div>
+  </div>
+
+  <div id="tab-board" style="display:none">
+    <div class="section-label">ลีดเดอร์บอร์ด</div>
+    <div class="leaderboard" id="leaderboard"></div>
+  </div>
+</div>
+</div>
+
+<script>
+const AVATARS = ['👨‍🌾','👩‍🌾','🧑‍🌾','👨‍💼','👩‍💼','🧑‍💻','👨‍🍳','👩‍🔬','🦸','🧙'];
+const SEEDS = [
+  {id:'carrot',name:'แครอท',em:'🥕',cost:10,sell:25,days:60},
+  {id:'tomato',name:'มะเขือเทศ',em:'🍅',cost:20,sell:55,days:120},
+  {id:'corn',name:'ข้าวโพด',em:'🌽',cost:30,sell:90,days:180},
+  {id:'watermelon',name:'แตงโม',em:'🍉',cost:50,sell:160,days:300},
+  {id:'chili',name:'พริก',em:'🌶',cost:15,sell:40,days:90},
+  {id:'pumpkin',name:'ฟักทอง',em:'🎃',cost:40,sell:120,days:240},
+];
+
+let me = null;
+let tool = 'till';
+let selectedSeed = 'carrot';
+let gameState = null;
+let pollTimer = null;
+
+function showErr(msg){const e=document.getElementById('login-err');e.textContent=msg;e.style.display='block';}
+
+function renderAvatarRow(){
+  const r=document.getElementById('avatar-row');
+  r.innerHTML=AVATARS.map((a,i)=>`<button class="av-btn ${i===0?'sel':''}" onclick="pickAv(${i})">${a}</button>`).join('');
+}
+
+let pickedAv=0;
+function pickAv(i){pickedAv=i;document.querySelectorAll('.av-btn').forEach((b,j)=>b.classList.toggle('sel',j===i));}
+
+async function doLogin(){
+  const name=document.getElementById('name-input').value.trim();
+  if(!name){showErr('กรุณาใส่ชื่อ');return;}
+  me={name,avatar:AVATARS[pickedAv],coins:120,inventory:{},earned:0};
+  await saveMyPlayer();
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('screen-game').classList.add('active');
+  document.getElementById('hud-av').textContent=me.avatar;
+  document.getElementById('hud-name').textContent=me.name;
+  await loadGame();
+  startPoll();
+  renderSeedShop();
+  setLog(`ยินดีต้อนรับ <b>${me.name}</b> สู่ฟาร์ม!`);
+}
+
+function logout(){
+  me=null;clearInterval(pollTimer);
+  document.getElementById('screen-game').classList.remove('active');
+  document.getElementById('screen-login').classList.add('active');
+}
+
+async function saveMyPlayer(){
+  try{
+    const key='player:'+me.name;
+    await window.storage.set(key,JSON.stringify({name:me.name,avatar:me.avatar,coins:me.coins,inventory:me.inventory,earned:me.earned,ts:Date.now()}),true);
+  }catch(e){}
+}
+
+async function loadGame(){
+  try{
+    const r=await window.storage.get('farm-plots',true);
+    gameState=r?JSON.parse(r.value):defaultFarm();
+  }catch(e){gameState=defaultFarm();}
+  growCrops();
+  renderFarm();
+  updateHud();
+  renderLeaderboard();
+}
+
+function defaultFarm(){
+  return {plots:Array(25).fill(null).map(()=>({state:'empty',seed:null,owner:null,ownerAv:null,plantedAt:null,wateredAt:null}))};
+}
+
+async function saveFarm(){
+  try{await window.storage.set('farm-plots',JSON.stringify(gameState),true);}catch(e){}
+}
+
+function startPoll(){
+  clearInterval(pollTimer);
+  pollTimer=setInterval(async()=>{
+    await loadGame();
+  },5000);
+}
+
+function growCrops(){
+  const now=Date.now();
+  if(!gameState)return;
+  gameState.plots.forEach(p=>{
+    if(!p.seed||p.state==='ready'||p.state==='empty'||p.state==='tilled')return;
+    const s=SEEDS.find(x=>x.id===p.seed);
+    if(!s)return;
+    const elapsed=(now-p.plantedAt)/1000;
+    let needed=s.days;
+    if(p.wateredAt&&(now-p.wateredAt)<3600000)needed*=0.7;
+    if(elapsed>=needed)p.state='ready';
+    else p.state=elapsed>needed*0.3?'growing':'seeded';
+  });
+}
+
+function renderFarm(){
+  if(!gameState)return;
+  const g=document.getElementById('farm-grid');
+  g.innerHTML=gameState.plots.map((p,i)=>{
+    let em='';let cls=p.state;
+    if(p.state==='seeded')em='🌱';
+    else if(p.state==='growing')em='🪴';
+    else if(p.state==='ready'){const s=SEEDS.find(x=>x.id===p.seed);em=s?s.em:'✅';}
+    const isMe=p.owner===me?.name;
+    const mineClass=isMe?' mine':'';
+    let pip='';
+    if(p.seed&&p.state!=='ready'&&p.state!=='tilled'&&p.state!=='empty'){
+      const s=SEEDS.find(x=>x.id===p.seed);
+      const now=Date.now();
+      let needed=(s?.days||60);
+      if(p.wateredAt&&(now-p.wateredAt)<3600000)needed*=0.7;
+      const pct=Math.min(100,Math.round(((now-p.plantedAt)/1000)/needed*100));
+      pip=`<div class="progress-pip" style="width:${pct}%"></div>`;
+    }
+    const waterMark=p.wateredAt&&(Date.now()-p.wateredAt)<3600000?'<span class="water-dot">💧</span>':'';
+    const ownerTag=p.owner&&!isMe?`<span class="owner-tag">${p.ownerAv}${p.owner}</span>`:'';
+    return `<div class="plot ${cls}${mineClass}" onclick="clickPlot(${i})" style="position:relative">${ownerTag}${em}${pip}${waterMark}</div>`;
+  }).join('');
+}
+
+function clickPlot(i){
+  if(!gameState||!me)return;
+  const p=gameState.plots[i];
+  if(tool==='till'){
+    if(p.state!=='empty'){setLog('⚠️ แปลงนี้ไม่ว่าง');return;}
+    p.state='tilled';p.owner=me.name;p.ownerAv=me.avatar;
+    setLog('⛏ ไถดินแปลง '+(i+1));
+    saveFarm();renderFarm();
+  } else if(tool==='seed'){
+    if(p.owner!==me.name){setLog('⚠️ แปลงของคนอื่น');return;}
+    if(p.state!=='tilled'){setLog('⚠️ ต้องไถดินก่อน');return;}
+    const s=SEEDS.find(x=>x.id===selectedSeed);
+    if(me.coins<s.cost){setLog('💸 เงินไม่พอ ต้องการ '+s.cost+'🪙');return;}
+    me.coins-=s.cost;p.seed=s.id;p.state='seeded';p.plantedAt=Date.now();p.wateredAt=null;
+    setLog(`🌱 หว่าน <b>${s.em}${s.name}</b> ใช้เวลา ${Math.round(s.days/60)} นาที`);
+    saveMyPlayer();saveFarm();renderFarm();updateHud();
+  } else if(tool==='water'){
+    if(p.owner!==me.name){setLog('⚠️ รดน้ำได้เฉพาะแปลงของตัวเอง');return;}
+    if(!['seeded','growing'].includes(p.state)){setLog('⚠️ ไม่มีพืชให้รดน้ำ');return;}
+    if(p.wateredAt&&(Date.now()-p.wateredAt)<3600000){setLog('💧 รดน้ำแล้วในชั่วโมงนี้');return;}
+    p.wateredAt=Date.now();
+    setLog('💧 รดน้ำแล้ว — เติบโตเร็วขึ้น 30%!');
+    saveFarm();renderFarm();
+  } else if(tool==='harvest'){
+    if(p.owner!==me.name){setLog('⚠️ เก็บได้เฉพาะแปลงของตัวเอง');return;}
+    if(p.state!=='ready'){setLog('⚠️ ยังไม่สุก');return;}
+    const s=SEEDS.find(x=>x.id===p.seed);
+    if(!me.inventory[s.id])me.inventory[s.id]=0;
+    me.inventory[s.id]++;
+    p.state='tilled';p.seed=null;p.plantedAt=null;p.wateredAt=null;
+    showPopup(i,'🧺 +1');
+    setLog(`🧺 เก็บ <b>${s.em}${s.name}</b> แล้ว!`);
+    saveMyPlayer();saveFarm();renderFarm();renderInventory();
+  }
+}
+
+function showPopup(plotIdx,txt){
+  const g=document.getElementById('farm-grid');
+  const el=g.children[plotIdx];
+  if(!el)return;
+  const pop=document.createElement('div');
+  pop.className='notify';pop.textContent=txt;
+  el.appendChild(pop);
+  setTimeout(()=>pop.remove(),1000);
+}
+
+function useTool(t,btn){
+  tool=t;
+  document.querySelectorAll('.tool').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(t==='sell')return;
+  const hints={till:'คลิกแปลงว่างเพื่อไถ',seed:`จะหว่าน ${SEEDS.find(x=>x.id===selectedSeed)?.em} — คลิกแปลงที่ไถแล้ว`,water:'คลิกแปลงของคุณเพื่อรดน้ำ',harvest:'คลิกแปลงที่พร้อมเก็บ (มีไฮไลต์เขียว)'};
+  setLog(hints[t]||'');
+}
+
+async function sellAll(){
+  let total=0;let sold=0;
+  for(const [id,qty] of Object.entries(me.inventory)){
+    if(qty>0){const s=SEEDS.find(x=>x.id===id);total+=s.sell*qty;sold+=qty;me.inventory[id]=0;}
+  }
+  if(total===0){setLog('ไม่มีผักในคลัง — เก็บเกี่ยวก่อนนะ');return;}
+  me.coins+=total;me.earned=(me.earned||0)+total;
+  setLog(`💵 ขาย <b>${sold} ชิ้น</b> ได้ <b>+${total}🪙</b>`);
+  await saveMyPlayer();updateHud();renderInventory();renderLeaderboard();
+}
+
+function updateHud(){
+  if(!me)return;
+  document.getElementById('hud-coins').textContent='🪙 '+me.coins;
+}
+
+function renderSeedShop(){
+  document.getElementById('seed-shop').innerHTML=SEEDS.map(s=>`
+    <div class="seed-card ${selectedSeed===s.id?'sel':''}" onclick="pickSeed('${s.id}',this)">
+      <span class="seed-em">${s.em}</span>
+      <div class="seed-nm">${s.name}</div>
+      <div class="seed-info">${Math.round(s.days/60)} นาที</div>
+      <div class="seed-pr">ซื้อ ${s.cost}🪙 → ขาย ${s.sell}🪙</div>
+    </div>
+  `).join('');
+}
+
+function pickSeed(id){
+  selectedSeed=id;renderSeedShop();
+  useTool('seed',document.getElementById('t-seed'));
+  const s=SEEDS.find(x=>x.id===id);
+  setLog(`เลือก <b>${s.em}${s.name}</b> — ไปที่ฟาร์มแล้วคลิกแปลงที่ไถแล้ว`);
+}
+
+function renderInventory(){
+  const el=document.getElementById('inventory-view');
+  const items=Object.entries(me.inventory||{}).filter(([,q])=>q>0);
+  if(!items.length){el.textContent='ยังไม่มีผัก — เก็บเกี่ยวก่อนแล้วกด "ขายหมด"';return;}
+  el.innerHTML=items.map(([id,q])=>{const s=SEEDS.find(x=>x.id===id);return `<span style="margin-right:12px">${s.em} ${s.name} ×${q}</span>`;}).join('');
+}
+
+async function renderLeaderboard(){
+  const el=document.getElementById('leaderboard');
+  try{
+    const keys=await window.storage.list('player:',true);
+    const players=[];
+    for(const k of (keys?.keys||[])){
+      try{const r=await window.storage.get(k,true);if(r)players.push(JSON.parse(r.value));}catch(e){}
+    }
+    players.sort((a,b)=>(b.earned||0)-(a.earned||0));
+    document.getElementById('online-pill').textContent=`● ${players.length} คนออนไลน์`;
+    el.innerHTML=players.slice(0,10).map((p,i)=>`
+      <div class="lb-row ${p.name===me?.name?'lb-me':''}">
+        <span class="lb-rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</span>
+        <span class="lb-av">${p.avatar}</span>
+        <span class="lb-name">${p.name}${p.name===me?.name?' (คุณ)':''}</span>
+        <span class="lb-coins">ขายได้ ${(p.earned||0).toLocaleString()}🪙</span>
+      </div>
+    `).join('') || '<div style="font-size:13px;color:var(--color-text-secondary)">ยังไม่มีผู้เล่น</div>';
+  }catch(e){el.innerHTML='<div style="font-size:13px;color:var(--color-text-secondary)">กำลังโหลด...</div>';}
+}
+
+function setLog(msg){document.getElementById('log-box').innerHTML=msg;}
+
+function switchTab(t,btn){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-farm').style.display=t==='farm'?'':'none';
+  document.getElementById('tab-shop').style.display=t==='shop'?'':'none';
+  document.getElementById('tab-board').style.display=t==='board'?'':'none';
+  if(t==='board')renderLeaderboard();
+  if(t==='shop'){renderSeedShop();renderInventory();}
+}
+
+renderAvatarRow();
+</script>
